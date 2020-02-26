@@ -16,14 +16,15 @@ app.use(morgan('dev')); // http logging
 app.use(cors()); // enable CORS request
 app.use(express.static('public')); // server files from /public folder
 app.use(express.json()); // enable reading incoming json data
+app.use(express.urlencoded({ extended: true }));
 // API Routes
 
 // *** TODOS ***
-app.get('/api/todos', async (req, res) => {
+app.get('/api/todos', async(req, res) => {
 
     try {
         const result = await client.query(`
-            
+            SELECT * FROM todos
         `);
 
         res.json(result.rows);
@@ -37,14 +38,16 @@ app.get('/api/todos', async (req, res) => {
 
 });
 
-app.post('/api/todos', async (req, res) => {
+app.post('/api/todos', async(req, res) => {
     const todo = req.body;
 
     try {
         const result = await client.query(`
-            
+            INSERT INTO todos (task, complete)
+            VALUES ('${todo.task}', false)
+            RETURNING *
         `,
-            [/* pass in data */]);
+        [todo.task, todo.complete]);
 
         res.json(result.rows[0]);
     }
@@ -56,14 +59,17 @@ app.post('/api/todos', async (req, res) => {
     }
 });
 
-app.put('/api/todos/:id', async (req, res) => {
+app.put('/api/todos/:id', async(req, res) => {
     const id = req.params.id;
     const todo = req.body;
 
     try {
         const result = await client.query(`
-            
-        `, [/* pass in data */]);
+            UPDATE todos
+            SET complete=${req.body.complete}
+            WHERE id=${req.params.id}
+        `, 
+        [todo.complete, id]);
 
         res.json(result.rows[0]);
     }
@@ -75,13 +81,15 @@ app.put('/api/todos/:id', async (req, res) => {
     }
 });
 
-app.delete('/api/todos/:id', async (req, res) => {
+app.delete('/api/todos/:id', async(req, res) => {
     // get the id that was passed in the route:
 
     try {
         const result = await client.query(`
-
-        `, [/* pass data */]);
+            DELETE FROM todos
+                WHERE id=$1
+        `, 
+        [req.params.id]);
 
         res.json(result.rows[0]);
     }
