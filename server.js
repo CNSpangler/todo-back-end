@@ -73,6 +73,27 @@ app.get('/api/todos', async(req, res) => {
 
 });
 
+app.post('/api/signup', async(req, res) => {
+    const todo = req.body;
+
+    try {
+        const result = await client.query(`
+            INSERT INTO todos (task, complete)
+            VALUES ('${todo.task}', false)
+            RETURNING *
+        `,
+        [todo.task, todo.complete]);
+
+        res.json(result.rows[0]);
+    }
+    catch (err) {
+        console.log(err);
+        res.status(500).json({
+            error: err.message || err
+        });
+    }
+});
+
 app.post('/api/todos', async(req, res) => {
     const todo = req.body;
 
