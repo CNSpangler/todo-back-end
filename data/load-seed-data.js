@@ -10,10 +10,10 @@ async function run() {
         await client.connect();
 
         await client.query(`
-        INSERT INTO users (email, hash, display_name)
-        VALUES ($1, $2, $3);
+        INSERT INTO users (email, hash)
+        VALUES ($1, $2);
     `,
-        ['user@aol.com', 'password', 'user']);
+        ['user@aol.com', 'password']);
 
         await Promise.all(
             todos.map(todo => {

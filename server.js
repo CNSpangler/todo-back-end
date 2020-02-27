@@ -26,7 +26,7 @@ const authRoutes = createAuthRoutes({
         console.log(user);
         return client.query(`
             INSERT into users (email, hash)
-            VALUES ($1, $2, $3)
+            VALUES ($1, $2)
             RETURNING id, email;
         `,
         [user.email, hash]
@@ -63,28 +63,6 @@ app.get('/api/todos', async(req, res) => {
         `);
 
         res.json(result.rows);
-    }
-    catch (err) {
-        console.log(err);
-        res.status(500).json({
-            error: err.message || err
-        });
-    }
-
-});
-
-app.post('/api/signup', async(req, res) => {
-    const todo = req.body;
-
-    try {
-        const result = await client.query(`
-            INSERT INTO todos (task, complete)
-            VALUES ('${todo.task}', false)
-            RETURNING *
-        `,
-        [todo.task, todo.complete]);
-
-        res.json(result.rows[0]);
     }
     catch (err) {
         console.log(err);
